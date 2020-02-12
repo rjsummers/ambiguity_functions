@@ -5,30 +5,34 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def ambgfun(x, fs, prf):
+def ambgfun(x, fs):
     """Calculate the ambiguity function of a radar waveform.
 
     This function calculates the monostatic ambiguity function of the radar
     waveform x, using FFTs to calculate the matched filter output.
     """
     ts = 1 / fs   # Sampling interval (seconds)
-    # tx = 1 / prf  # Pulse repitition interval (seconds)
 
-    # t = np.arange(0, tx, step=ts)
-    # x = np.pad(x, (0, np.size(t) - np.size(x)))
     nx = np.size(x)
     t = np.arange(0, nx) * ts
     delay = np.arange(1-nx, nx) * ts
     n = np.size(delay)
+    nfft = int(2**(np.ceil(np.log2(n))))
+    m = nfft
+    dshifts = np.arange(-m/2, m/2, dtype=int)
+    doppler = dshifts * prf
 
-    m = int(2**(np.ceil(np.log2(n))))
-    doppler = np.arange(-m/2, m/2) * prf
-
-    X = np.fft.fft(x[None, :] * np.exp(1j * 2 * np.pi *
-                                       doppler[..., None] * t[None, :]),
-                   n=n, axis=1)
-    H = np.fft.fft(np.conj(np.flip(x)), n=n)
-    ambig = np.fft.ifft(X * H[None, :])
+    X0 = np.fft.fft(x, n=nfft)
+    X = np.zeros((m, nfft), dtype=complex)
+    for i in range(1, m):
+        X[i, :] = np.roll(X0, dshifts[i])
+    H = np.fft.fft(np.conj(np.flip(x)), n=nfft)
+    # X = np.fft.fft(x[None, :] * np.exp(1j * 2 * np.pi *
+    #                                    doppler[..., None] * t[None, :]),
+    #                n=n, axis=1)
+    # H = np.fft.fft(np.conj(np.flip(x)), n=n)
+    ambig = np.fft.ifft(X * H[None, :], axis=1)
+    ambig = ambig[:, 0:n]
     return ambig, delay, doppler
 
 
@@ -74,7 +78,7 @@ prf = 10000
 t = np.arange(0, tx, step=ts)
 
 x = np.ones(np.shape(t))
-ambig, delay, doppler = ambgfun(x, fs, prf)
+ambig, delay, doppler = ambgfun(x, fs)
 
 plt.figure()
 plt.pcolormesh(delay / 1e-6, doppler / 1e3, np.abs(ambig))
@@ -110,7 +114,7 @@ t = np.arange(0, tx, step=ts)
 chirpyness = bw / tx
 theta = - np.pi * bw * t + np.pi * chirpyness * t**2
 x = np.exp(1j * theta)
-ambig, delay, doppler = ambgfun(x, fs, prf)
+ambig, delay, doppler = ambgfun(x, fs)
 
 plt.figure()
 plt.pcolormesh(delay / 1e-6, doppler / 1e3, np.abs(ambig))
@@ -141,7 +145,7 @@ x = np.zeros((117,))
 for i in range(np.size(x)):
     x[i] = code[i // 9]
 fs = 8e6
-ambig, delay, doppler = ambgfun(x, fs, prf)
+ambig, delay, doppler = ambgfun(x, fs)
 
 plt.figure()
 plt.plot(x)
