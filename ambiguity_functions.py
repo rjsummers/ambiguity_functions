@@ -26,39 +26,8 @@ def ambgfun(x, fs, prf):
     for i in range(1, m):
         X[i, :] = np.roll(X0, dshifts[i])
     H = np.fft.fft(np.conj(np.flip(x)), n=nfft)
-    # X = np.fft.fft(x[None, :] * np.exp(1j * 2 * np.pi *
-    #                                    doppler[..., None] * t[None, :]),
-    #                n=n, axis=1)
-    # H = np.fft.fft(np.conj(np.flip(x)), n=n)
     ambig = np.fft.ifft(X * H[None, :], axis=1)
     ambig = ambig[:, 0:n]
-    return ambig, delay, doppler
-
-
-def ambgfun2(x, fs, prf):
-    """Calculate the ambiguity function of a radar waveform.
-
-    This function calculates the monostatic ambiguity function of the radar
-    waveform x by directly calculating the correlation of the waveform with a
-    doppler shifted copy of itself. This function is computationally
-    inefficient compared to ambgfun2, which uses FFTs to perform the
-    correlation, and should be preferred.
-    """
-    ts = 1 / fs  # Sampling interval (seconds)
-
-    nx = np.size(x)
-    t = np.arange(0, nx) / fs
-    delay = np.arange(1-nx, nx) * ts
-    n = np.size(delay)
-
-    m = int(2**(np.ceil(np.log2(n))))
-    doppler = np.arange(-m/2, m/2) * prf
-
-    ambig = np.zeros((m, n), dtype=complex)
-    for i in range(0, m):
-        fd = doppler[i]
-        dshift = np.exp(1j * 2 * np.pi * fd * t)
-        ambig[i, :] = np.correlate(x * dshift, x, mode="full")
     return ambig, delay, doppler
 
 
