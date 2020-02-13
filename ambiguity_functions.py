@@ -10,6 +10,27 @@ def ambgfun(x, fs):
 
     This function calculates the monostatic narrowband ambiguity function of
     the radar waveform x.
+
+    Parameters
+    ----------
+    x : array_like
+        A vector containing a radar waveform.
+    fs : float
+        The sampling frequency of the radar waveform in Hz.
+
+    Returns
+    -------
+    ambig : 2d ndarray
+        A matrix containing the ambiguity function of the radar waveform
+        evaluated at the delays and Doppler shifts contained in the
+        corresponding return values. The first axis of ambig indexes the
+        Doppler shift and the second axis indexes the delay.
+    delay : 1d ndarray
+        A vector containing the delays the ambiguity function was evaluated
+        at, in seconds.
+    doppler : 1d ndarray
+        A vector containing the doppler shifts the ambiguity function was
+        evaluated at, in Hz.
     """
     ts = 1 / fs   # Sampling interval (seconds)
 
