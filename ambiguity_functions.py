@@ -8,24 +8,37 @@ import seaborn as sns
 def ambgfun(x, fs):
     """Calculate the ambiguity function of a radar waveform.
 
-    This function calculates the monostatic ambiguity function of the radar
-    waveform x, using FFTs to calculate the matched filter output.
+    This function calculates the monostatic narrowband ambiguity function of
+    the radar waveform x.
     """
     ts = 1 / fs   # Sampling interval (seconds)
 
+    # Delay-related quantities
     nx = np.size(x)
     delay = np.arange(1-nx, nx) * ts
     n = np.size(delay)
     nfft = int(2**(np.ceil(np.log2(n))))
+
+    # Doppler-related quantities
     m = nfft
     dshifts = np.arange(-m/2, m/2, dtype=int)
     doppler = dshifts * (fs / nfft)
 
+    # Calculate the FFT of the radar waveform
     X0 = np.fft.fft(x, n=nfft)
+
+    # Generate a matrix of Doppler-shifted copies of the radar waveform.
+    # This is done by circularly shifting the FFT of the waveform by each
+    # possible shift value.
     X = np.zeros((m, nfft), dtype=complex)
     for i in range(1, m):
         X[i, :] = np.roll(X0, dshifts[i])
+
+    # Generate the matched filter for the radar waveform.
     H = np.fft.fft(np.conj(np.flip(x)), n=nfft)
+
+    # Apply the matched filter to the doppler shifted waveforms to obtain
+    # the ambiguity function.
     ambig = np.fft.ifft(X * H[None, :], axis=1)
     ambig = ambig[:, 0:n]
     return ambig, delay, doppler
