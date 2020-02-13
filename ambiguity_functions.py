@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def ambgfun(x, fs, prf):
+def ambgfun(x, fs):
     """Calculate the ambiguity function of a radar waveform.
 
     This function calculates the monostatic ambiguity function of the radar
@@ -46,7 +46,7 @@ prf = 10000
 t = np.arange(0, tx, step=ts)
 
 x = np.ones(np.shape(t))
-ambig, delay, doppler = ambgfun(x, fs, prf)
+ambig, delay, doppler = ambgfun(x, fs)
 
 plt.figure()
 plt.pcolormesh(delay / 1e-6, doppler / 1e3, np.abs(ambig))
@@ -82,7 +82,7 @@ t = np.arange(0, tx, step=ts)
 chirpyness = bw / tx
 theta = - np.pi * bw * t + np.pi * chirpyness * t**2
 x = np.exp(1j * theta)
-ambig, delay, doppler = ambgfun(x, fs, prf)
+ambig, delay, doppler = ambgfun(x, fs)
 
 plt.figure()
 plt.pcolormesh(delay / 1e-6, doppler / 1e3, np.abs(ambig))
@@ -113,7 +113,7 @@ x = np.zeros((117,))
 for i in range(np.size(x)):
     x[i] = code[i // 9]
 fs = 8e6
-ambig, delay, doppler = ambgfun(x, fs, prf)
+ambig, delay, doppler = ambgfun(x, fs)
 
 plt.figure()
 plt.plot(x)
