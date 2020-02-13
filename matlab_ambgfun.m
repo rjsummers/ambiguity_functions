@@ -13,9 +13,9 @@ fs = waveform.SampleRate;
 [afmag,delay,doppler] = ambgfun(x,waveform.SampleRate,prf);
 
 figure()
-imagesc(delay,doppler,afmag)
-xlabel('Delay (seconds)')
-ylabel('Doppler Shift (hertz)')
+imagesc(delay / 1e-6,doppler / 1e3,afmag)
+xlabel('Delay (\mus)')
+ylabel('Doppler Shift (kHz)')
 
 %% LFM Waveform
 fs = 8e6;
@@ -31,8 +31,8 @@ fs = waveform.SampleRate;
 [afmag,delay,doppler] = ambgfun(x,waveform.SampleRate,prf);
 
 figure()
-imagesc(delay,doppler,afmag)
-xlabel('Delay (seconds)')
-ylabel('Doppler Shift (hertz)')
+imagesc(delay / 1e-6,doppler / 1e3,afmag)
+xlabel('Delay (\mus)')
+ylabel('Doppler Shift (kHz)')
 
 %% Barker Waveform

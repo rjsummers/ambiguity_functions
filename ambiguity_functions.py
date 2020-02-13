@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 
-def ambgfun(x, fs):
+def ambgfun(x, fs, prf):
     """Calculate the ambiguity function of a radar waveform.
 
     This function calculates the monostatic ambiguity function of the radar
@@ -14,13 +14,12 @@ def ambgfun(x, fs):
     ts = 1 / fs   # Sampling interval (seconds)
 
     nx = np.size(x)
-    t = np.arange(0, nx) * ts
     delay = np.arange(1-nx, nx) * ts
     n = np.size(delay)
     nfft = int(2**(np.ceil(np.log2(n))))
     m = nfft
     dshifts = np.arange(-m/2, m/2, dtype=int)
-    doppler = dshifts * prf
+    doppler = dshifts * (fs / nfft)
 
     X0 = np.fft.fft(x, n=nfft)
     X = np.zeros((m, nfft), dtype=complex)
@@ -78,7 +77,7 @@ prf = 10000
 t = np.arange(0, tx, step=ts)
 
 x = np.ones(np.shape(t))
-ambig, delay, doppler = ambgfun(x, fs)
+ambig, delay, doppler = ambgfun(x, fs, prf)
 
 plt.figure()
 plt.pcolormesh(delay / 1e-6, doppler / 1e3, np.abs(ambig))
@@ -114,7 +113,7 @@ t = np.arange(0, tx, step=ts)
 chirpyness = bw / tx
 theta = - np.pi * bw * t + np.pi * chirpyness * t**2
 x = np.exp(1j * theta)
-ambig, delay, doppler = ambgfun(x, fs)
+ambig, delay, doppler = ambgfun(x, fs, prf)
 
 plt.figure()
 plt.pcolormesh(delay / 1e-6, doppler / 1e3, np.abs(ambig))
@@ -145,7 +144,7 @@ x = np.zeros((117,))
 for i in range(np.size(x)):
     x[i] = code[i // 9]
 fs = 8e6
-ambig, delay, doppler = ambgfun(x, fs)
+ambig, delay, doppler = ambgfun(x, fs, prf)
 
 plt.figure()
 plt.plot(x)
